@@ -1,0 +1,3 @@
+# django-foosball
+
+README
