@@ -1,24 +1,48 @@
-from rest_framework import viewsets
+# -*- coding: utf-8 -*-
 
-from game.models import Player, Team, Match, TeamMatch
-from game.serializers import PlayerSerializer, TeamSerializer, MatchSerializer, TeamMatchSerializer
+from rest_framework import generics
+from rest_framework.response import Response
+from rest_framework.reverse import reverse
+from rest_framework.views import APIView
+
+from game.models import Player, Team
+from game.serializers import PlayerSerializer, TeamSerializer, TeamCreateSerializer
 
 
-class PlayerViewSet(viewsets.ModelViewSet):
-    queryset = Player.objects.all()
-    serializer_class = PlayerSerializer
+class APIRoot(APIView):
+    def get(self, request):
+        return Response({
+            'players': reverse('game:player-list', request=request),
+            'teams-create': reverse('game:team-create', request=request),
+            'teams': reverse('game:team-list', request=request),
+        })
 
 
-class TeamViewSet(viewsets.ModelViewSet):
+class TeamCreate(generics.CreateAPIView):
+    queryset = Team.objects.all()
+    serializer_class = TeamCreateSerializer
+
+
+class TeamList(generics.ListAPIView):
     queryset = Team.objects.all()
     serializer_class = TeamSerializer
 
 
-class MatchViewSet(viewsets.ModelViewSet):
-    queryset = Match.objects.all()
-    serializer_class = MatchSerializer
+class TeamRetriveDestroy(generics.RetrieveDestroyAPIView):
+    queryset = Team.objects.all()
+    serializer_class = TeamSerializer
 
 
-class TeamMatchViewSet(viewsets.ModelViewSet):
-    queryset = TeamMatch.objects.all()
-    serializer_class = TeamMatchSerializer
+class TeamDetail(generics.RetrieveDestroyAPIView):
+    queryset = Team.objects.all()
+    serializer_class = TeamSerializer
+
+
+class PlayersList(generics.ListCreateAPIView):
+    queryset = Player.objects.all()
+    serializer_class = PlayerSerializer
+
+
+class PlayersDetail(generics.RetrieveDestroyAPIView):
+    queryset = Player.objects.all()
+    serializer_class = PlayerSerializer

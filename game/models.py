@@ -1,4 +1,7 @@
+# -*- coding: utf-8 -*-
+
 from django.db import models
+
 from game.helpers import FieldHistory
 
 
@@ -11,6 +14,12 @@ class Player(FieldHistory):
 
 class Team(FieldHistory):
     players = models.ManyToManyField(Player)
+
+    def __str__(self):
+        display = ''
+        [display.join(player.name + ', ') if index == 0 else display.join(player.name) for index, player in
+         enumerate(self.players.all())]
+        return display
 
 
 STATES = (
