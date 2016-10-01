@@ -1,31 +1,20 @@
 # -*- coding: utf-8 -*-
 import json
+import requests
 
 from game.utils import get_or_create_team
 from players.models import Player
 from rest_framework import generics
 from rest_framework.exceptions import ValidationError
-from rest_framework.renderers import JSONRenderer
 from rest_framework.reverse import reverse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from django.http import HttpResponse
 
 from django.conf import settings
 
 from game.models import Team, Match, MatchSet
 from game.serializers import TeamSerializer, MatchSerializer
-
-
-class JSONResponse(HttpResponse):
-    """
-    An HttpResponse that renders its content into JSON.
-    """
-    def __init__(self, data, **kwargs):
-        content = JSONRenderer().render(data)
-        kwargs['content_type'] = 'application/json'
-        super(JSONResponse, self).__init__(content, **kwargs)
 
 
 class APIRoot(APIView):
@@ -161,5 +150,6 @@ class SlackTestView(APIView):
             winner_points=winner_points,
             looser_points=looser_points
         )
-
-        return JSONResponse(self.get_response(winner_score, looser_score, winner, looser, self.get_ball(ball)), status=status.HTTP_200_OK, content_type='application/json')
+        data = self.get_response(winner_score, looser_score, winner, looser, self.get_ball(ball))
+        requests.post(settings.SLACK_MATCH_WEBHOOK_URL, data=data)
+        return Response(status=status.HTTP_200_OK)
