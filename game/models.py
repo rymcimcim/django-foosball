@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from django.db import models
-from game.helpers import FieldHistory
 
+from game.helpers import FieldHistory
 from players.models import Player
 
 
@@ -14,19 +14,31 @@ class Team(FieldHistory):
         return display
 
 
-STATES = (
-    ('win', 'win'),
-    ('lost', 'lost'),
-    ('tie', 'tie'),
+BALLS = (
+    ('wolna', 'wolna'),
+    ('szybka', 'szybka'),
 )
-
-
-class TeamMatch(FieldHistory):
-    team = models.ForeignKey(Team)
-    score = models.IntegerField()
-    state = models.CharField(max_length=25, choices=STATES)
 
 
 class Match(FieldHistory):
     added_by = models.ForeignKey(Player)
-    teams = models.ManyToManyField(Team)
+    winner_team = models.ForeignKey(Team, related_name='won_match')
+    looser_team = models.ForeignKey(Team, related_name='lost_match')
+    winner_score = models.PositiveSmallIntegerField()
+    looser_score = models.PositiveSmallIntegerField()
+    ball = models.CharField(choices=BALLS, default='wolna', max_length=10)
+
+
+class MatchSet(FieldHistory):
+    match = models.ForeignKey(Match)
+    winner_points = models.PositiveSmallIntegerField()
+    looser_points = models.PositiveSmallIntegerField()
+
+
+
+# class TeamMatch(FieldHistory):
+#     team = models.ForeignKey(Team)
+#     match = models.ForeignKey(Match)
+#     won = models.PositiveSmallIntegerField()
+#     lost = models.PositiveSmallIntegerField()
+#     state = models.CharField(max_length=10, choices=STATES)
