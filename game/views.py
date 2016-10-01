@@ -149,4 +149,4 @@ class SlackTestView(APIView):
             looser_points=looser_points
         )
 
-        return Response(self.get_response(winner_score, looser_score, winner, looser, self.get_ball(ball)), status=status.HTTP_200_OK)
+        return Response(self.get_response(winner_score, looser_score, winner, looser, self.get_ball(ball)), status=status.HTTP_200_OK, content_type='application/json')
