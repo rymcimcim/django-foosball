@@ -29,6 +29,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+SLACK_TOKEN = ''
 
 # Application definition
 

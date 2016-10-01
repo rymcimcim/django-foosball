@@ -7,6 +7,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
+from django.conf import settings
+
 from game.models import Player, Team
 from game.serializers import PlayerSerializer, TeamSerializer, TeamCreateSerializer
 
@@ -52,5 +54,7 @@ class PlayersDetail(generics.RetrieveDestroyAPIView):
 class SlackTestView(APIView):
 
     def post(self, request, format=None):
+        if not 'token' in request.POST or request.POST['token'] != settings.SLACK_TOKEN:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         data = request.data
         return Response(data, status=status.HTTP_200_OK)
