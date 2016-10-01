@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import json
+
 from game.utils import get_or_create_team
 from players.models import Player
 from rest_framework import generics
@@ -44,19 +46,14 @@ class MatchDetail(generics.RetrieveDestroyAPIView):
 
 
 class SlackTestView(APIView):
-    def post(self, request, format=None):
-        if 'token' not in request.data or request.data['token'] != settings.SLACK_TOKEN:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-
-        text_list = request.data['text'].split(' ')
+    def get_data(self):
+        text_list = self.request.data['text'].split(' ')
         players = []
-        user_added = None
         for player in text_list:
             if player.startswith('@'):
                 players.append(player[1:])
             elif player == 'ja':
-                user_added = Player.objects.get(login=request.data['user_name'])
-                players.append(request.data['user_name'])
+                players.append(self.request.data['user_name'])
 
         scores = [score for score in text_list[4:6]]
         ball = text_list[len(text_list) - 1]
@@ -69,8 +66,48 @@ class SlackTestView(APIView):
         except Player.DoesNotExist:
             raise ValidationError('Jeden lub wieku graczy nie istanieje.')
 
-        if user_added is None:
-            user_added = Player.objects.get(login=request.data['user_name'])
+        user_added = Player.objects.get(login=self.request.data['user_name'])
+        return player1, player2, player3, player4, scores, ball, user_added
+
+    def get_response(self, winner_score, looser_score, winner, looser, response_ball):
+        response = {
+            "username": "Adam Nawałka",
+            "attachments": [
+                {
+                    "fallback": "Required plain-text summary of the attachment.",
+                    "color": "#36a64f ",
+                    "pretext": "Zakończyła się rozgrywka w piłkarzyki",
+                    "title": "Mecz zakończył się wynikiem %s:%s" % (str(winner_score), str(looser_score)),
+                    "fields": [
+                        {
+                            "title": "Zwyciężcy",
+                            "value": "%s\n%s" % (winner.players.first().name, winner.players.last().name),
+                            "short": True
+                        },
+                        {
+                            "title": "Przegrani",
+                            "value": "%s\n%s" % (looser.players.first().name, looser.players.last().name),
+                            "short": True
+                        }
+                    ],
+                    "footer": "Rozgrywka była z użyciem %s piłki" % response_ball
+                }
+            ]
+        }
+        return json.dumps(response)
+
+    def get_ball(self, ball):
+        if ball == 'szybka':
+            response_ball = 'szybkiej'
+        else:
+            response_ball = 'wolnej'
+        return response_ball
+
+    def post(self, request, format=None):
+        if 'token' not in request.data or request.data['token'] != settings.SLACK_TOKEN:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+        player1, player2, player3, player4, scores, ball, user_added = self.get_data()
 
         team1 = get_or_create_team(player1, player2)
         team2 = get_or_create_team(player3, player4)
@@ -112,7 +149,4 @@ class SlackTestView(APIView):
             looser_points=looser_points
         )
 
-        data = MatchSerializer(match).data
-
-        # data = request.data
-        return Response(data, status=status.HTTP_200_OK)
+        return Response(self.get_response(winner_score, looser_score, winner, looser, self.get_ball(ball)), status=status.HTTP_200_OK)
