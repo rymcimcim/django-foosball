@@ -2,9 +2,7 @@
 
 from django.conf.urls import url
 
-from game.views import PlayersList, PlayersDetail, TeamList, TeamCreate, TeamRetriveDestroy, SlackTestView
-
-from game.views import TeamList, TeamCreate, TeamRetriveDestroy
+from game.views import TeamList, TeamCreate, TeamRetriveDestroy, SlackTestView
 
 urlpatterns = [
     url(r'^teams/$', TeamList.as_view(), name='team-list'),
