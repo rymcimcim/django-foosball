@@ -151,5 +151,5 @@ class SlackTestView(APIView):
             looser_points=looser_points
         )
         data = self.get_response(winner_score, looser_score, winner, looser, self.get_ball(ball))
-        requests.post(settings.SLACK_MATCH_WEBHOOK_URL, data=data)
+        r = requests.post(settings.SLACK_MATCH_WEBHOOK_URL, data=data)
         return Response(status=status.HTTP_200_OK)
