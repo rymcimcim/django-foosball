@@ -5,14 +5,14 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.views import APIView
 
-from game.models import Player, Team
-from game.serializers import PlayerSerializer, TeamSerializer, TeamCreateSerializer
+from game.models import Team
+from game.serializers import TeamSerializer, TeamCreateSerializer
 
 
 class APIRoot(APIView):
     def get(self, request):
         return Response({
-            'players': reverse('game:player-list', request=request),
+            'players': reverse('players:player-list', request=request),
             'teams-create': reverse('game:team-create', request=request),
             'teams': reverse('game:team-list', request=request),
         })
@@ -36,13 +36,3 @@ class TeamRetriveDestroy(generics.RetrieveDestroyAPIView):
 class TeamDetail(generics.RetrieveDestroyAPIView):
     queryset = Team.objects.all()
     serializer_class = TeamSerializer
-
-
-class PlayersList(generics.ListCreateAPIView):
-    queryset = Player.objects.all()
-    serializer_class = PlayerSerializer
-
-
-class PlayersDetail(generics.RetrieveDestroyAPIView):
-    queryset = Player.objects.all()
-    serializer_class = PlayerSerializer

@@ -27,6 +27,7 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^api/$', APIRoot.as_view(), name='api-root'),
     url(r'^api/', include('game.urls', namespace='game')),
+    url(r'^api/players/', include('players.urls', namespace='players')),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]
 

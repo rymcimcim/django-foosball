@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'players.apps.PlayersConfig',
     'game.apps.GameConfig',
     'rest_framework',
 ]
@@ -88,6 +89,8 @@ DATABASES = {
 
 # Password validation
 # https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
+
+AUTH_USER_MODEL = 'players.Player'
 
 AUTH_PASSWORD_VALIDATORS = [
     {
