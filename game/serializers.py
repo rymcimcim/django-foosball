@@ -6,15 +6,6 @@ from rest_framework.exceptions import ValidationError
 from game.models import Player, Team, Match, TeamMatch
 
 
-class PlayerSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Player
-        fields = '__all__'
-        extra_kwargs = {
-            'url': {'view_name': 'game:player-detail'}
-        }
-
-
 class TeamCreateSerializer(serializers.Serializer):
     player1 = serializers.CharField(max_length=255, min_length=3)
     player2 = serializers.CharField(max_length=255, min_length=3)
@@ -89,7 +80,7 @@ class TeamSerializer(serializers.HyperlinkedModelSerializer):
         fields = '__all__'
         extra_kwargs = {
             'url': {'view_name': 'game:team-retrive-destroy'},
-            'players': {'view_name': 'game:player-detail'}
+            'players': {'view_name': 'players:player-detail'}
         }
 
 

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from rest_framework import generics
-from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -9,14 +8,14 @@ from rest_framework import status
 
 from django.conf import settings
 
-from game.models import Player, Team
-from game.serializers import PlayerSerializer, TeamSerializer, TeamCreateSerializer
+from game.models import Team
+from game.serializers import TeamSerializer, TeamCreateSerializer
 
 
 class APIRoot(APIView):
     def get(self, request):
         return Response({
-            'players': reverse('game:player-list', request=request),
+            'players': reverse('players:player-list', request=request),
             'teams-create': reverse('game:team-create', request=request),
             'teams': reverse('game:team-list', request=request),
         })
@@ -42,17 +41,7 @@ class TeamDetail(generics.RetrieveDestroyAPIView):
     serializer_class = TeamSerializer
 
 
-class PlayersList(generics.ListCreateAPIView):
-    queryset = Player.objects.all()
-    serializer_class = PlayerSerializer
-
-
-class PlayersDetail(generics.RetrieveDestroyAPIView):
-    queryset = Player.objects.all()
-    serializer_class = PlayerSerializer
-
 class SlackTestView(APIView):
-
     def post(self, request, format=None):
         if not 'token' in request.POST or request.POST['token'] != settings.SLACK_TOKEN:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
