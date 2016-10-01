@@ -49,11 +49,11 @@ class SlackTestView(APIView):
     def get_data(self):
         text_list = self.request.data['text'].split(' ')
         players = []
-        for player in text_list:
-            if player.startswith('@'):
-                players.append(player[1:])
-            elif player == 'ja':
+        for player in text_list[:4]:
+            if player == 'ja':
                 players.append(self.request.data['user_name'])
+            else:
+                players.append(player)
 
         scores = [score for score in text_list[4:6]]
         ball = text_list[len(text_list) - 1]
