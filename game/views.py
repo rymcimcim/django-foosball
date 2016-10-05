@@ -128,32 +128,6 @@ class SlackTestView(APIView):
                 team2_score += 1
         return team1_score, team2_score
 
-    def get_response_scores(self, scores):
-        response_scores = ''
-        for index, score in enumerate(scores):
-            home, away = scores[index].split(':')
-            if int(home) > int(away):
-                response_scores += home + ':' + away
-            else:
-                response_scores += away + ':' + home
-
-            if index != len(scores) - 1:
-                response_scores += ' '
-        return response_scores
-
-        # home1, away1 = scores[0].split(':')
-        # home2, away2 = scores[1].split(':')
-        # if int(home1) > int(away1):
-        #     response_scores = home1 + ':' + away1
-        # else:
-        #     response_scores = away1 + ':' + home1
-        #
-        # if int(home2) > int(away2):
-        #     response_scores = response_scores + ' ' + home2 + ':' + away2
-        # else:
-        #     response_scores = response_scores + ' ' + away2 + ':' + home2
-        # return response_scores
-
     def post(self, request, format=None):
         if 'token' not in request.data or request.data['token'] != settings.SLACK_TOKEN:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
@@ -193,8 +167,8 @@ class SlackTestView(APIView):
                 looser_points=match_set_looser
             )
 
-        response_scores = self.get_response_scores(scores)
+        response_scores = ' '.join(scores)
 
         data = self.get_response(winner_score, looser_score, winner, looser, self.get_ball(ball), response_scores)
         r = requests.post(settings.SLACK_MATCH_WEBHOOK_URL, data=data)
-        return Response(status=status.HTTP_200_OK)
+        return Response(data, status=status.HTTP_200_OK)
