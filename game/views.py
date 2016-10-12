@@ -74,60 +74,6 @@ class SlackTestView(APIView):
         user_added = Player.objects.get(login=self.request.data['user_name'])
         return player1, player2, player3, player4, scores, ball, user_added
 
-    def get_response(self, winner_score, looser_score, winner, looser, response_ball, response_scores):
-        response = {
-            "username": "Adam Nawałka",
-            "response_type": "in_channel",
-            "attachments": [
-                {
-                    "fallback": "Required plain-text summary of the attachment.",
-                    "color": "#36a64f ",
-                    "pretext": "Zakończyła się rozgrywka w piłkarzyki",
-                    "title": "Mecz zakończył się wynikiem %s:%s (%s)" % (str(winner_score), str(looser_score), response_scores),
-                    "fields": [
-                        {
-                            "title": "Zwyciężcy",
-                            "value": "%s\n%s" % (winner.players.first().name, winner.players.last().name),
-                            "short": True
-                        },
-                        {
-                            "title": "Przegrani",
-                            "value": "%s\n%s" % (looser.players.first().name, looser.players.last().name),
-                            "short": True
-                        }
-                    ],
-                    "footer": "Rozgrywka odbyła się z użyciem %s piłki" % response_ball
-                }
-            ]
-        }
-        return json.dumps(response)
-
-    def get_ball(self, ball):
-        if ball == 'szybka':
-            response_ball = 'szybkiej'
-        else:
-            response_ball = 'wolnej'
-        return response_ball
-
-    def get_match_set_points(self, team1_points_list, team2_points_list):
-        if sum(team1_points_list) > sum(team2_points_list):
-            match_set_winner_points = team1_points_list
-            match_set_looser_points = team2_points_list
-        else:
-            match_set_winner_points = team2_points_list
-            match_set_looser_points = team1_points_list
-        return match_set_winner_points, match_set_looser_points
-
-    def get_team_scores(self, team1_points_list, team2_points_list):
-        team1_score = 0
-        team2_score = 0
-        for points1, points2 in zip(team1_points_list, team2_points_list):
-            if points1 > points2:
-                team1_score += 1
-            else:
-                team2_score += 1
-        return team1_score, team2_score
-
     def post(self, request, format=None):
         if 'token' not in request.data or request.data['token'] != settings.SLACK_TOKEN:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
@@ -137,38 +83,16 @@ class SlackTestView(APIView):
         team1 = get_or_create_team(player1, player2)
         team2 = get_or_create_team(player3, player4)
 
-        team1_points_list = [int(score.split(':')[0]) for score in scores]
-        team2_points_list = [int(score.split(':')[1]) for score in scores]
-        team1_points = sum(team1_points_list)
-        team2_points = sum(team2_points_list)
-
-        match_set_winner_points, match_set_looser_points = self.get_match_set_points(team1_points_list, team2_points_list)
-        team1_score, team2_score = self.get_team_scores(team1_points_list, team2_points_list)
-
-        winner = team1 if team1_points > team2_points else team2
-        winner_score = team1_score if team1_score > team2_score else team2_score
-
-        looser = team1 if team1_points < team2_points else team2
-        looser_score = team1_score if team1_score < team2_score else team2_score
 
         match = Match.objects.create(
             added_by=user_added,
-            winner_team=winner,
-            looser_team=looser,
-            winner_score=winner_score,
-            looser_score=looser_score,
+            team_1=team1,
+            team_2=team2,
             ball=ball
         )
+        for score in scores:
+            points = score.split(':')
+            match.add_match_set(int(points[0]), int(points[1]))
+        match.calculate_score()
 
-        for match_set_winner, match_set_looser in zip(match_set_winner_points, match_set_looser_points):
-            MatchSet.objects.create(
-                match=match,
-                winner_points=match_set_winner,
-                looser_points=match_set_looser
-            )
-
-        response_scores = ' '.join(scores)
-
-        data = self.get_response(winner_score, looser_score, winner, looser, self.get_ball(ball), response_scores)
-        r = requests.post(settings.SLACK_MATCH_WEBHOOK_URL, data=data)
-        return Response(data, status=status.HTTP_200_OK)
+        return Response(match.report_score_to_slack(), status=status.HTTP_200_OK)
