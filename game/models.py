@@ -38,6 +38,9 @@ class Match(FieldHistory):
     ball = models.CharField(choices=BALLS, default='wolna', max_length=10)
     state = models.CharField(choices=MATCH_STATES, max_length=4, blank=True, null=True)
 
+    def __str__(self):
+        return '%s %s %s' % (self.team_1_score, self.team_2_score, self.get_ball_display())
+
     def add_match_set(self, team_1_points, team_2_points):
         MatchSet.objects.create(match=self, team_1_points=team_1_points, team_2_points=team_2_points)
 

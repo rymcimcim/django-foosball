@@ -83,7 +83,6 @@ class SlackTestView(APIView):
         team1 = get_or_create_team(player1, player2)
         team2 = get_or_create_team(player3, player4)
 
-
         match = Match.objects.create(
             added_by=user_added,
             team_1=team1,
