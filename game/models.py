@@ -4,6 +4,8 @@ import requests
 
 from django.db import models
 from django.conf import settings
+from django.db.models import F
+from django.db.models import Sum
 
 from game.helpers import FieldHistory
 from players.models import Player
@@ -44,6 +46,12 @@ class Match(FieldHistory):
     def add_match_set(self, team_1_points, team_2_points):
         MatchSet.objects.create(match=self, team_1_points=team_1_points, team_2_points=team_2_points)
 
+    def get_team_1_total_points(self):
+        return self.matchset_set.aggregate(points=Sum(F('team_1_points')))['points']
+
+    def get_team_2_total_points(self):
+        return self.matchset_set.aggregate(points=Sum(F('team_2_points')))['points']
+
     def get_set_scores(self):
         set_scores = self.matchset_set.values_list('team_1_points', 'team_2_points')
         resp_array = []
@@ -70,6 +78,7 @@ class Match(FieldHistory):
             self.state = 'lost'
         else:
             self.state = 'tie'
+        self.save()
 
     def report_score_to_slack(self):
         response = {
