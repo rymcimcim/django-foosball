@@ -41,7 +41,7 @@ class Match(FieldHistory):
     state = models.CharField(choices=MATCH_STATES, max_length=4, blank=True, null=True)
 
     def __str__(self):
-        return '%s vs %s:%s %s:%s' % (self.team_1, self.team_2, self.team_1_score, self.team_2_score, self.team_1_score, self.team_2_score)
+        return '%s vs %s %s:%s %s:%s' % (self.team_1, self.team_2, self.team_1_score, self.team_2_score, self.team_1_score, self.team_2_score)
 
     def add_match_set(self, team_1_points, team_2_points):
         MatchSet.objects.create(match=self, team_1_points=team_1_points, team_2_points=team_2_points)
