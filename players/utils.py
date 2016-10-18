@@ -7,7 +7,7 @@ def get_user_scores():
     table = PrettyTable()
     table.field_names = ["Gracz", "W", "P", "StrzB", "StraB", "% wyg", "Strzel/strac"]
 
-    for p in Player.objects.all().order_by('-win_percent'):
+    for p in Player.objects.all().order_by('-win_percent', '-win_lost_points_ratio'):
         if (p.won_games + p.lost_games + p.tie_games) > 0:
             table.add_row([p.name, p.won_games, p.lost_games, p.won_point, p.lost_point, p.win_percent, p.win_lost_points_ratio])
     print(table)

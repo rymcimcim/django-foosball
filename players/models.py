@@ -46,7 +46,7 @@ class Player(AbstractBaseUser, FieldHistory):
     lost_point = models.IntegerField(default=0)
 
     # percent of won matches
-    win_percent = models.DecimalField(default=0, max_digits=4, decimal_places=1)
+    win_percent = models.DecimalField(default=0, max_digits=5, decimal_places=2)
     win_lost_points_ratio = models.DecimalField(default=0, max_digits=5, decimal_places=3)
 
     objects = PlayerManager()
